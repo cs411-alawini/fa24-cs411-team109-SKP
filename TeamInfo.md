@@ -10,10 +10,10 @@
 | Captain     |  kexinx4@illinois.edu  |
 | Member1     |        Lily Zhang       |
 | Member1     |   shuxing3@illinois.edu  |
-| Member2     |     Ti-Chung Cheng     |
-| Member2     |  tichung3@illinois.edu |
-| Member3     |                        |
-| Member3     |                        |
+| Member2     |     Sally Xue     |
+| Member2     |  kexinx4@illinois.edu  |
+| Member3     |    Pradyumann Singhal  |
+| Member3     |    ps95@illinois.edu   |
 
 ## Project Information
 
