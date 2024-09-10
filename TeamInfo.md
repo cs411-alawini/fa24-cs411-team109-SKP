@@ -4,12 +4,12 @@
 
 |   Info      |        Description     |
 | ----------- | ---------------------- |
-| TeamID      |        Team-000        |
-| TeamName    |         sample         |
-| Captain     |       Abdu Alawini     |
-| Captain     |  alawini@illinois.edu  |
-| Member1     |        Kevin Pei       |
-| Member1     |   kevin2@illinois.edu  |
+| TeamID      |        Team-109        |
+| TeamName    |         SKP         |
+| Captain     |       Sally Xue     |
+| Captain     |  kexinx4@illinois.edu  |
+| Member1     |        Lily Zhang       |
+| Member1     |   shuxing3@illinois.edu  |
 | Member2     |     Ti-Chung Cheng     |
 | Member2     |  tichung3@illinois.edu |
 | Member3     |                        |
