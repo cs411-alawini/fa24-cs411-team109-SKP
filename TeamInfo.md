@@ -12,8 +12,8 @@
 | Member1     |   shuxing3@illinois.edu  |
 | Member2     |     Pradyumann Singhal |
 | Member2     |    ps95@illinois.edu   |
-| Member3     |      |
-| Member3     |      |
+| Member3     |    Schanne Joesph  |
+| Member3     |     schanne3@illinois.edu |
 
 ## Project Information
 
