@@ -1,4 +1,10 @@
-# TeamID-SampleProject
+# Team109-Spotify Comment Hub
+## How to run our repo locally
+Backend: Navigate to spotify-backend, run python3 app.py. Currently if you go to 'http://127.0.0.1:5001/search_songs' and see some json queries, then it's correctly setup.
+
+Frontend: Navigate to spotify-frontend, run 'npm start'. If you see a 'Search Songs' frontend then it's correct.
+
+## Original Readme below
 This is a template for CS411 project repository. Please make sure that your title follows the convention: [TeamID]-[YourTeamName]. All TeamID should have a three digit coding (i.e. if you are team 20, you should have `team020` as your ID.). You should also make sure that your url for this repository is [fa24-cs411-team000-teamname.git] so TAs can correctly clone your repository and keep them up-to-date.
 
 Once you setup your project, please remember to submit your team formation to the team form.
