@@ -3,6 +3,7 @@
 Backend: Navigate to spotify-backend, run python3 app.py. Currently if you go to 'http://127.0.0.1:5001/search_songs' and see some json queries, then it's correctly setup.
 
 Frontend: Navigate to spotify-frontend, run 'npm start'. If you see a 'Search Songs' frontend then it's correct.
+
 Acknowledgement: Chatgpt used for assisting frontend styling, which is allowed according to syllabus: 'For project track 1, Generative AI can be utilized to assist with front-end development tasks'.
 
 ## Original Readme below
