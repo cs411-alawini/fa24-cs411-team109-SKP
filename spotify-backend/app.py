@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
+import datetime
 
 app = Flask(__name__)
 
@@ -23,8 +24,8 @@ connection = mysql.connector.connect(**db_config)
 def isLoginValid():
     try:
         # Get search query parameter from the request
-        user_id = request.json.get('userId', '')
-        password = request.json.get('password', '')
+        user_id = request.args.get('userId', '')
+        password = request.args.get('password', '')
 
         # if username or password is missing
         if user_id == '' or password == '':
@@ -57,7 +58,7 @@ def isLoginValid():
 def getSongByTitle():
     try:
         # Get PARAMS from the request
-        song_name = request.json.get('songName', '')
+        song_name = request.args.get('songName', '')
 
 
         cursor = connection.cursor()
@@ -69,6 +70,7 @@ def getSongByTitle():
 
         # Format results as a JSON response
         songs = [{"SongName": row[0], "SongID": row[1]} for row in result]
+        print(songs)
         return jsonify(songs)
 
     except Exception as e:
@@ -99,7 +101,7 @@ def getSongByTitle():
 def getSongInfo():
     try:
         # Get PARAMS from the request
-        song_id = request.json.get('songId', '')  # Default to empty string if no query is provided
+        song_id = request.args.get('songId', '')  # Default to empty string if no query is provided
 
         cursor = connection.cursor()
         query = "SELECT * FROM SONGS NATURAL JOIN ARTISTS NATURAL JOIN ALBUMS WHERE SongID = %s;"
@@ -142,17 +144,18 @@ def getSongInfo():
 def addComment():
     try:
         # Get PARAMS from the request
-        new_comment_info = request.json.get('newCommentInfo', '')
-        user_id = request.json.get('userId', '')
+        new_comment_info = request.args.get('newCommentInfo', '')
+        user_id = request.args.get('userId', '')
 
         # Had to add these 3 to make sense of the query
-        song_id = request.json.get('songId', '')
-        rating = request.json.get('rating', '')
-        response_to = request.json.get('responseTo', None)
+        song_id = request.args.get('songId', '')
+        rating = request.args.get('rating', '')
+        response_to = request.args.get('responseTo', None)
         cursor = connection.cursor()
 
         # SQL query
         query = "INSERT INTO COMMENTS (UserID, SongID, CommentInfo, Rating, CreatedOn, ResponseTo) VALUES (%s, %s, %s, %s, NOW(), %s);"
+        print("here")
         cursor.execute(query, (user_id, song_id, new_comment_info, rating, response_to))
         connection.commit()
 
@@ -170,7 +173,7 @@ def addComment():
 def deleteComment():
     try:
         # Get PARAMS from the request
-        comment_id = request.json.get('commentId', '')
+        comment_id = request.args.get('commentId', '')
 
         cursor = connection.cursor()
         # SQL query
@@ -190,8 +193,8 @@ def deleteComment():
 def editComment():
     try:
         # Get PARAMS from the request
-        comment_id = request.json.get('commentId', '')
-        new_comment_info = request.json.get('newCommentInfo', '')
+        comment_id = request.args.get('commentId', '')
+        new_comment_info = request.args.get('newCommentInfo', '')
 
         cursor = connection.cursor()
         # SQL query
