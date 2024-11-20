@@ -1,0 +1,104 @@
+/* General styles */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #121212;
+    /* Spotify dark theme */
+    color: #fff;
+}
+
+/* User info styling */
+.user-info {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    /* Align to the top-right corner */
+    font-size: 1rem;
+    color: #b3b3b3;
+    /* Subtle gray for the username */
+}
+
+/* Centered search container */
+.search-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    /* Full viewport height */
+    text-align: center;
+    padding: 20px;
+}
+
+/* Input field styling */
+.search-input {
+    width: 50%;
+    max-width: 600px;
+    padding: 15px;
+    border: none;
+    border-radius: 30px;
+    outline: none;
+    font-size: 1rem;
+    text-align: center;
+    background-color: #1e1e1e;
+    /* Dark input background */
+    color: #fff;
+    /* White text */
+    margin-bottom: 25px;
+}
+
+.search-input::placeholder {
+    color: #b3b3b3;
+    /* Subtle gray placeholder text */
+    font-style: italic;
+}
+
+/* Search button styling */
+.search-button {
+    background-color: #1DB954;
+    /* Spotify green */
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    margin-bottom: 30px;
+}
+
+.search-button:hover {
+    background-color: #1aa34a;
+    /* Slightly darker green on hover */
+}
+
+/* Songs list styling */
+.songs-list {
+    margin-top: 30px;
+    list-style-type: none;
+    padding: 0;
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.song-item {
+    background-color: #1e1e1e;
+    /* Dark background for list items */
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.song-item:hover {
+    background-color: #333333;
+    /* Lighter background on hover */
+}
+
+.song-details p {
+    margin: 0;
+    font-size: 1rem;
+    color: #fff;
+}
