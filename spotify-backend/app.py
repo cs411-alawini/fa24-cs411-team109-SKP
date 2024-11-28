@@ -116,10 +116,16 @@ def getSongInfo():
         result2 = cursor.fetchall()
         cursor.close()
 
-        print(result, result2, song_id)
-        # Format results as a JSON response
+        # print(result, result2, song_id)
         song = result[0]
-        print(song, result, result2)
+        ratings = [entry[3] for entry in list(result2)]
+
+        # Calculate the average rating
+        if ratings: 
+            average_rating = sum(ratings) / len(ratings)
+        else:
+            average_rating = 0 
+        # print("rating: ", average_rating)
         song_info = {
             "SongID": song[2],
             "SongName": song[3],
@@ -129,8 +135,10 @@ def getSongInfo():
             "ArtistName": song[5],
             "AlbumName": song[6],
             "Description": song[7],
-            "Comments": list(result2)
+            "Comments": list(result2),
+            "AvgRating": average_rating,
         }
+        cursor.close()
         return jsonify(song_info)
 
     except Exception as e:
@@ -155,7 +163,6 @@ def addComment():
 
         # SQL query
         query = "INSERT INTO COMMENTS (UserID, SongID, CommentInfo, Rating, CreatedOn, ResponseTo) VALUES (%s, %s, %s, %s, NOW(), %s);"
-        print("here")
         cursor.execute(query, (user_id, song_id, new_comment_info, rating, response_to))
         connection.commit()
 
@@ -195,11 +202,13 @@ def editComment():
         # Get PARAMS from the request
         comment_id = request.args.get('commentId', '')
         new_comment_info = request.args.get('newCommentInfo', '')
+        new_rating = request.args.get('newRating', 0)
+        print(request.args)
 
         cursor = connection.cursor()
         # SQL query
-        query = "UPDATE COMMENTS SET CommentInfo = %s WHERE CommentID = %s;"
-        cursor.execute(query, (new_comment_info, comment_id))
+        query = "UPDATE COMMENTS SET CommentInfo = %s, Rating = %s WHERE CommentID = %s;"
+        cursor.execute(query, (new_comment_info, new_rating, comment_id))
         connection.commit()
         cursor.close()
         return jsonify(True)
@@ -207,6 +216,36 @@ def editComment():
     except Exception as e:
         # Handle general errors
         return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/getAverageRating', methods=['GET'])
+def getAverageRating():
+    try:
+        # Get the song ID from request parameters
+        song_id = request.args.get('songId', '').strip()
+        if not song_id:
+            return jsonify({"error": "Invalid song ID"}), 400
+
+        cursor = connection.cursor()
+        # Query to calculate the average rating for the song
+        query = """
+            SELECT AVG(Rating) AS average_rating FROM COMMENTS
+            WHERE SongID = %s;
+        """
+        cursor.execute(query, (song_id,))
+        result = cursor.fetchone()
+        cursor.close()
+
+        # Extract average rating or default to 0 if no comments exist
+        average_rating = result[0] if result[0] is not None else 0
+        print(average_rating)
+
+        return jsonify({"averageRating": round(average_rating, 2)}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

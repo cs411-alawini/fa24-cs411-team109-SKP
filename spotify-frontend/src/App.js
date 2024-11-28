@@ -120,6 +120,16 @@ const CommentPage = () => {
   const [isEditing, setIsEditing] = useState(null);
   const [editedComment, setEditedComment] = useState("");
   const [newComment, setNewComment] = useState("");
+  const [rating, setRating] = useState(0);
+  const [editedRating, setEditedRating] = useState(0);
+
+  const handleStarClick = (index) => {
+    setRating(index + 1);
+  };
+
+  const handleEditedStarClick = (index) => {
+    setEditedRating(index + 1);
+  }
 
   const currentUserId = localStorage.getItem("UserId");
 
@@ -133,6 +143,7 @@ const CommentPage = () => {
         artistName: response.data.ArtistName,
         albumName: response.data.AlbumName,
         releaseDate: response.data.ReleaseDate,
+        averageRating: response.data.AvgRating,
       };
       setSongDetails(songInfo);
       setCommentsState(response.data.Comments);
@@ -158,7 +169,7 @@ const CommentPage = () => {
           userId: currentUserId,
           songId: songId,
           newCommentInfo: newComment,
-          rating: "5",
+          rating: rating,
           responseTo: "1",
         }
       });
@@ -166,7 +177,7 @@ const CommentPage = () => {
       const d = new Date();
       let time = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
 
-      let addedComment = [currentUserId, response.data.commentId, newComment, "5", time, "1"];
+      let addedComment = [currentUserId, response.data.commentId, newComment, rating, time, "1"];
       setCommentsState([addedComment, ...comments]);
 
       // console.log(comments);
@@ -177,9 +188,10 @@ const CommentPage = () => {
   };
 
   // Handle editing a comment
-  const handleEdit = (commentId, initialComment) => {
+  const handleEdit = (commentId, initialComment, initialRating) => {
     setIsEditing(commentId);
     setEditedComment(initialComment);
+    setEditedRating(initialRating)
   };
 
   // Handle saving the edited comment
@@ -188,11 +200,11 @@ const CommentPage = () => {
     // console.log(comments);
     try {
       await axios.put(`http://localhost:5001/editComment?commentId=${commentId}`, null,
-        { params: { commentId: commentId, newCommentInfo: edited } }
+        { params: { commentId: commentId, newCommentInfo: edited, newRating: editedRating, } }
       );
       setCommentsState(
         comments.map((comment) =>
-          comment[1] === commentId ? [comment[0], comment[1], edited, comment[3], comment[4], comment[5], comment[6]] : comment //{ ...comment, commentInfo: editedComment } : comment
+          comment[1] === commentId ? [comment[0], comment[1], edited, editedRating, comment[4], comment[5], comment[6]] : comment //{ ...comment, commentInfo: editedComment } : comment
         )
       );
       setIsEditing(null);
@@ -224,11 +236,25 @@ const CommentPage = () => {
           <div className="song-info">
             <p>Album: {songDetails.albumName}</p>
             <p>Release Date: {songDetails.releaseDate}</p>
+            <p>Average Rating: {songDetails.averageRating}</p>
           </div>
 
           {/* Comments section */}
           <div className="comments-section">
-            <h3>Add a Comment:</h3>
+            <div className="comments-header">
+              <h3>Add a Comment:</h3>
+              <div className="star-rating">
+                {Array.from({ length: 5 }, (_, index) => (
+                  <span
+                    key={index}
+                    className={`star ${index < rating ? 'filled' : ''}`}
+                    onClick={() => handleStarClick(index)}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+            </div>
             <div className="comment-input">
               <textarea
                 value={newComment}
@@ -245,7 +271,20 @@ const CommentPage = () => {
                   <div className="user-info">
                     <strong>{comment[6]}</strong> (UserID: {comment[0]})
                   </div>
-                  <div className="comment-rating">Rating: {comment[3]}</div>
+                  <div className="comment-rating">
+                    <div style={{ display: 'flex' }}>
+                      {Array.from({ length: 5 }, (_, index) => (
+                        <span
+                          key={index}
+                          className={index < (isEditing === comment[1] ? editedRating : comment[3]) ? 'filled' : 'empty'}
+                          onClick={isEditing === comment[1] ? () => handleEditedStarClick(index) : () => handleStarClick(index)}
+                          style={{ cursor: isEditing === comment[1] ? 'pointer' : 'default' }}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="comment-body">
@@ -271,7 +310,7 @@ const CommentPage = () => {
 
                 {currentUserId === comment[0] && (
                   <div className="comment-buttons">
-                    <button onClick={() => handleEdit(comment[1], comment[2])}>
+                    <button onClick={() => handleEdit(comment[1], comment[2], comment[3])}>
                       Edit
                     </button>
                     <button onClick={() => handleDelete(comment[1])}>Delete</button>

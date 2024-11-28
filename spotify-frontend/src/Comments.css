@@ -49,6 +49,14 @@ body {
     border-radius: 10px;
 }
 
+.comments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    margin-left: 5px;
+}
+
 .comment-input {
     display: flex;
     flex-direction: column;
@@ -111,12 +119,22 @@ body {
 }
 
 .comment-rating {
-    font-size: 0.9rem;
-    background-color: #1DB954;
-    /* Spotify green */
-    padding: 5px 10px;
-    border-radius: 20px;
-    color: #fff;
+    display: flex;
+}
+
+.comment-rating span {
+    font-size: 1.2rem;
+    transition: color 0.2s;
+}
+
+.comment-rating span.filled {
+    color: #ffc107;
+    /* Yellow for filled stars */
+}
+
+.comment-rating span.empty {
+    color: #ccc;
+    /* Gray for empty stars */
 }
 
 /* Body styles */
@@ -191,4 +209,21 @@ body {
 .comment-buttons button:hover {
     background-color: #1DB954;
     color: #000;
+}
+
+.star-rating {
+    display: flex;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+.star {
+    font-size: 1.6rem;
+    color: #ccc;
+    /* Default gray color */
+    transition: color 0.2s;
+}
+
+.star.filled {
+    color: #ffc107;
 }
