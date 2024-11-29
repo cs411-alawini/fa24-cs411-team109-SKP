@@ -118,13 +118,13 @@ def getSongInfo():
 
         # print(result, result2, song_id)
         song = result[0]
-        ratings = [entry[3] for entry in list(result2)]
+        ratings = [entry[3] for entry in list(result2) if 1 <= entry[3] <= 5]
 
         # Calculate the average rating
-        if ratings: 
+        if ratings:
             average_rating = sum(ratings) / len(ratings)
         else:
-            average_rating = 0 
+            average_rating = 0
         # print("rating: ", average_rating)
         song_info = {
             "SongID": song[2],

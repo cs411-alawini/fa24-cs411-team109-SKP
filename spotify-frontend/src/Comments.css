@@ -227,3 +227,87 @@ body {
 .star.filled {
     color: #ffc107;
 }
+
+.reply-button {
+    margin-top: 10px;
+    text-align: right;
+    /* Align the button to the right */
+}
+
+.reply-button button {
+    background-color: #4caf50;
+    /* Green button */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.reply-button button:hover {
+    background-color: #45a049;
+    /* Slightly darker green on hover */
+}
+
+
+.replies-section {
+    margin-left: 20px;
+    /* Indent reply section for hierarchy */
+    border-left: 2px solid #ccc;
+    /* Add a subtle line for separation */
+    padding-left: 10px;
+}
+
+.reply-comment {
+    margin-top: 10px;
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    /* Light gray border */
+    border-radius: 6px;
+    background-color: lightgray;
+    /* Slightly tinted background */
+    font-size: 14px;
+    /* Smaller font size than main comments */
+}
+
+.reply-comment .comment-header {
+    font-weight: bold;
+    color: #555;
+    /* Darker gray for user info */
+    margin-bottom: 5px;
+}
+
+.reply-comment .user-info {
+    font-size: 12px;
+    /* Even smaller for user info */
+    color: #777;
+    /* Lighter gray */
+}
+
+.reply-comment .comment-body p {
+    font-size: 15px;
+    color: #333;
+    /* Slightly darker text for readability */
+    margin: 5px 0;
+}
+
+.reply-comment .comment-footer {
+    font-size: 12px;
+    /* Small footer text */
+    color: #888;
+    /* Subtle gray for footer info */
+    display: flex;
+    justify-content: space-between;
+    /* Space out footer elements */
+    margin-bottom: -8px;
+}
+
+.reply-comment .response-to {
+    font-style: italic;
+}
+
+.reply-comment .comment-date {
+    font-style: italic;
+}

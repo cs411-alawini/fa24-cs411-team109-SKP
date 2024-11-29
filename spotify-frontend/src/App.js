@@ -123,6 +123,16 @@ const CommentPage = () => {
   const [rating, setRating] = useState(0);
   const [editedRating, setEditedRating] = useState(0);
 
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
+  const [newReplyComment, setNewReplyComment] = useState('');
+
+  // This function handles the reply button click, setting the necessary states.
+  const handleReplyClick = (commentId) => {
+    setIsReplying(true);
+    setReplyingToCommentId(commentId);  // Set the ID of the comment being replied to
+  };
+
   const handleStarClick = (index) => {
     setRating(index + 1);
   };
@@ -170,20 +180,57 @@ const CommentPage = () => {
           songId: songId,
           newCommentInfo: newComment,
           rating: rating,
-          responseTo: "1",
+          responseTo: null,
+        }
+      });
+
+      console.log("response: ", response)
+
+      const d = new Date();
+      let time = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+
+      // last element is the replies list
+      let addedComment = [currentUserId, response.data.commentId, newComment, rating, time, null, []];
+      setCommentsState([addedComment, ...comments]);
+
+      setNewComment('');
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    }
+  };
+
+  // Handle adding a reply to a comment
+  const handleAddReply = async () => {
+    if (newReplyComment.trim() === "") return;
+
+    try {
+      const response = await axios.post(`http://localhost:5001/addComment`, null, {
+        params: {
+          userId: currentUserId,
+          songId: songId,
+          newCommentInfo: newReplyComment,
+          rating: rating,
+          responseTo: replyingToCommentId, // Set the parent comment's ID as the responseTo
         }
       });
 
       const d = new Date();
       let time = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
 
-      let addedComment = [currentUserId, response.data.commentId, newComment, rating, time, "1"];
-      setCommentsState([addedComment, ...comments]);
+      let addedReply = [currentUserId, response.data.commentId, newReplyComment, rating, time, replyingToCommentId, []];
 
-      // console.log(comments);
-      setNewComment(""); // clear input field
+      // Update the comments state to add the reply to the parent comment's replies list
+      setCommentsState(comments.map(comment =>
+        comment[1] === replyingToCommentId
+          ? [comment[0], comment[1], comment[2], comment[3], comment[4], comment[5], [...comment[6], addedReply]]  // Add the reply
+          : comment
+      ));
+
+      setNewReplyComment('');
+      setIsReplying(false);
+      setReplyingToCommentId(null);
     } catch (error) {
-      console.error("Error adding comment:", error);
+      console.error("Error adding reply:", error);
     }
   };
 
@@ -269,7 +316,8 @@ const CommentPage = () => {
               <div key={comment[1]} className="comment">
                 <div className="comment-header">
                   <div className="user-info">
-                    <strong>{comment[6]}</strong> (UserID: {comment[0]})
+                    UserID: {comment[0]};
+                    CommentID: {comment[1] || 'None'}
                   </div>
                   <div className="comment-rating">
                     <div style={{ display: 'flex' }}>
@@ -305,8 +353,49 @@ const CommentPage = () => {
 
                 <div className="comment-footer">
                   <p className="response-to">Response To: {comment[5] || 'None'}</p>
+
                   <p className="comment-date">{comment[4]}</p>
                 </div>
+
+                {/* Reply Button for Current Comment */}
+                <div className="reply-button">
+                  <button onClick={() => handleReplyClick(comment[1])}>Reply</button>
+                </div>
+
+                {/* Handle Reply Input UI */}
+                {isReplying && replyingToCommentId === comment[1] && (
+                  <div className="comment-body">
+                    <textarea
+                      value={newReplyComment}
+                      onChange={(e) => setNewReplyComment(e.target.value)}  // Set reply comment state
+                      placeholder="Write your reply..."
+                    />
+                    <button onClick={handleAddReply}>Submit Reply</button>
+                  </div>
+                )}
+                {Array.isArray(comment[6]) && comment[6].length > 0 && (
+                  <div className="replies-section">
+                    {comment[6].map((reply) => (
+                      Array.isArray(reply) && ( // Check if reply is an array
+                        <div key={reply[1]} className="comment reply-comment">
+                          <div className="comment-header">
+                            <div className="user-info">
+                              UserID: {reply[0]};
+                              CommentID: {reply[1] || 'None'}
+                            </div>
+                          </div>
+                          <div className="comment-body">
+                            <p>{reply[2]}</p>
+                          </div>
+                          <div className="comment-footer">
+                            <p className="response-to">Response To: {reply[5] || 'None'}</p>
+                            <p className="comment-date">{reply[4]}</p>
+                          </div>
+                        </div>
+                      )
+                    ))}
+                  </div>
+                )}
 
                 {currentUserId === comment[0] && (
                   <div className="comment-buttons">
@@ -321,8 +410,9 @@ const CommentPage = () => {
             ))}
           </div>
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 
