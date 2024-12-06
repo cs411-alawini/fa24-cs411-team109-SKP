@@ -1,29 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate, useParams, Navigate, Outlet, useLocation } from 'react-router-dom';
 import axios from 'axios';
-// import CommentSection from "./CommentSection";
 import './Login.css';
 import './SearchSongs.css';
 import './Comments.css'
 
+const CLIENT_ID = '76375b25d05c404f8b5a5699a3617854';
+const CLIENT_SECRET = '1ad9565291394bac8f55747f6b2b2e1d';
+const REDIRECT_URI = 'http://localhost:3000/search';
+const TOKEN_INFO = 'token_info'
+
+
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [loginStatus, setLoginStatus] = useState([]);
+  // const [loginStatus, setLoginStatus] = useState([]);
   const [error, setError] = useState('');
+  const { userId } = useParams();
   const navigate = useNavigate();
+
+  const checkIfAlreadyLoggedIn = async () => {
+    try {
+      const localUserId = localStorage.getItem('UserId');
+      
+      if (userId != null) {
+
+        const loginResponse = await axios.get(`http://localhost:5001/isLoginValid?userId=${userId}&password=${userId}`);
+        console.log(loginResponse.data);
+        localStorage.setItem('UserId', loginResponse.data.UserID);
+        localStorage.setItem('UserName', loginResponse.data.Username);
+        navigate('/search');
+
+      } else if (localUserId != null) {
+        navigate('/search');
+      }
+      
+    } catch (err) {
+      console.error('Error checking session:', err);
+    }
+  };
+
+  useEffect(() => {
+    checkIfAlreadyLoggedIn();
+  }, []);
 
   const handleLogin = async () => {
     try {
       const response = await axios.get(`http://localhost:5001/isLoginValid?userId=${username}&password=${password}`);
       localStorage.setItem('UserId', response.data.UserID);
       localStorage.setItem('UserName', response.data.Username);
-      navigate('/'); // Navigate to homepage or dashboard after login
+      navigate('/search'); // Navigate to homepage or dashboard after login
     } catch (err) {
+      console.log(err);
       setError(err.response ? err.response.data.message : 'Login failed');
     }
   };
 
+  const handleSpotifyLogin = async () => {
+    try {
+      
+      localStorage.clear();
+      window.location.href = 'http://localhost:5001/spotifyLogin';
+
+    } catch (err) {
+      setError(err.response ? err.response.data.message : 'Login failed');
+    }
+  };
 
   return (
     <div className="login-container">
@@ -45,6 +87,9 @@ const Login = () => {
         />
         <button onClick={handleLogin} className="login-button">
           Log In
+        </button>
+        <button onClick={handleSpotifyLogin} className="spotify-auth-button">
+          Spotify Log In
         </button>
         {error && <p className="login-error">{error}</p>}
       </div>
@@ -79,9 +124,23 @@ const SearchSongs = () => {
     navigate(`/comments/${songId}`); // navigate to the gallery page with artist ID
   };
 
+  const handleLogout = async () => {
+    localStorage.clear();
+    await axios.delete(`http://localhost:5001/logout`);
+    navigate('/login');
+    console.log("logout button clicked");
+  };
+
   return (
     <div>
-      <div className="user-info">User: {localStorage.getItem('UserName')}</div>
+      <div className="user-info">
+        User: {localStorage.getItem('UserName')}
+      </div>
+      <div>
+        <button onClick={handleLogout} className="logout-button">
+          Log Out
+        </button>
+      </div>
       <div className="search-container">
         <input
           type="text"
@@ -114,6 +173,7 @@ const SearchSongs = () => {
 const CommentPage = () => {
   const { songId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [songDetails, setSongDetails] = useState(null);
   const [comments, setCommentsState] = useState([]);
@@ -165,6 +225,12 @@ const CommentPage = () => {
   useEffect(() => {
     displayPage();
   }, [songId, location]);
+
+  const handleLogout = async () => {
+    localStorage.clear();
+    navigate('/login');
+    console.log("logout button clicked");
+  };
 
   // Handle adding a comment
   const handleAddComment = async () => {
@@ -275,7 +341,11 @@ const CommentPage = () => {
     <div>
       {/* User info in top-right corner */}
       <div className="user-info">User: {localStorage.getItem('UserName')}</div>
-
+      <div>
+        <button onClick={handleLogout} className="logout-button">
+          Log Out
+        </button>
+      </div>
       {/* Song details section */}
       {songDetails && (
         <div className="song-details-container">
@@ -422,8 +492,10 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/login/:userId" element={<Login />} />
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<SearchSongs />} />
+          <Route path="/search" element={<SearchSongs />} />
           <Route path="/comments/:songId" element={<CommentPage />} />
           {/* <Route path="/album-details/:albumId" element={<AlbumDetails />} /> */}
         </Route>
