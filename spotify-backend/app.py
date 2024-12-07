@@ -52,6 +52,65 @@ def isLoginValid():
         # Handle general errors
         return jsonify({"error": str(e)}), 500
 
+#A minimal interface for logging out
+@app.route('/logout', methods=['DELETE'])
+def logout():
+    try:
+        return jsonify({'message': 'Logged out successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+      
+      
+@app.route('/register', methods=['POST'])
+def register():
+    try:
+        # Get registration data from request parameters
+        username = request.args.get('username', '').strip()
+        password = request.args.get('password', '').strip()
+        email = request.args.get('email', '').strip()
+
+        # Validate input
+        if not username or not password or not email:
+            return jsonify({"error": "All fields are required"}), 400
+
+        cursor = connection.cursor()
+
+        # Check if username already exists
+        cursor.execute("SELECT Username FROM USERS WHERE Username = %s", (username,))
+        if cursor.fetchone():
+            cursor.close()
+            return jsonify({"error": "Username already exists"}), 409
+
+        # Check if email already exists
+        cursor.execute("SELECT Email FROM USERS WHERE Email = %s", (email,))
+        if cursor.fetchone():
+            cursor.close()
+            return jsonify({"error": "Email already exists"}), 409
+
+        # Generate a unique UserID
+        # Get the highest numeric UserID and increment by 1
+        cursor.execute("SELECT MAX(CAST(UserID AS SIGNED)) FROM USERS WHERE UserID REGEXP '^[0-9]+$'")
+        result = cursor.fetchone()
+        next_id = str(1 if result[0] is None else result[0] + 1)
+
+        # Insert new user
+        query = "INSERT INTO USERS (UserID, Username, Password, Email) VALUES (%s, %s, %s, %s)"
+        cursor.execute(query, (next_id, username, password, email))
+        connection.commit()
+        cursor.close()
+
+        return jsonify({
+            "message": "Registration successful",
+            "UserID": next_id,
+            "Username": username,
+            "Email": email
+        }), 201
+
+    except Exception as e:
+        if cursor:
+            cursor.close()
+        return jsonify({"error": str(e)}), 500
+      
 # getSongByTitle(songName: String)
 # Return a list of {songName: String, songId: String}, ranked based on some sort of string similarity algorithm. The maximum length of this list should be 10.
 @app.route('/getSongByTitle', methods=['GET'])

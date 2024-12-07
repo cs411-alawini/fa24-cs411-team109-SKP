@@ -66,6 +66,11 @@ const Login = () => {
       setError(err.response ? err.response.data.message : 'Login failed');
     }
   };
+  
+  const handleRegister = () => {
+    navigate('/register'); // You'll need to create a registration route and component
+  };
+
 
   return (
     <div className="login-container">
@@ -91,11 +96,102 @@ const Login = () => {
         <button onClick={handleSpotifyLogin} className="spotify-auth-button">
           Spotify Log In
         </button>
+        <button onClick={handleRegister} className="register-button">
+          Register
+        </button>
         {error && <p className="login-error">{error}</p>}
       </div>
     </div>
   );
 }
+
+const Register = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleRegister = async () => {
+    // Basic validation
+    if (!username || !password || !confirmPassword || !email) {
+      setError('All fields are required');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:5001/register', null, {
+        params: {
+          username: username,
+          password: password,
+          email: email
+        }
+      });
+
+      // Assuming the backend returns success message
+      console.log('Registration successful:', response.data);
+      
+      // Navigate to login page after successful registration
+      navigate('/login');
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err.response?.data?.message || 'Registration failed');
+    }
+  };
+
+  const handleBackToLogin = () => {
+    navigate('/login');
+  };
+
+  return (
+    <div className="login-container">
+      <div className="login-box">
+        <h1 className="login-title">Register</h1>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Username"
+          className="login-input"
+        />
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          className="login-input"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="login-input"
+        />
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Confirm Password"
+          className="login-input"
+        />
+        <button onClick={handleRegister} className="login-button">
+          Register
+        </button>
+        <button onClick={handleBackToLogin} className="register-button">
+          Back to Login
+        </button>
+        {error && <p className="login-error">{error}</p>}
+      </div>
+    </div>
+  );
+};
 
 const PrivateRoute = () => {
   const isAuthenticated = localStorage.getItem('UserId');
@@ -493,6 +589,7 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/login/:userId" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<SearchSongs />} />
           <Route path="/search" element={<SearchSongs />} />
