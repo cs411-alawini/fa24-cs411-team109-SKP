@@ -22,7 +22,7 @@ const Login = () => {
   const checkIfAlreadyLoggedIn = async () => {
     try {
       const localUserId = localStorage.getItem('UserId');
-      
+
       if (userId != null) {
 
         const loginResponse = await axios.get(`http://localhost:5001/isLoginValid?userId=${userId}&password=${userId}`);
@@ -34,7 +34,7 @@ const Login = () => {
       } else if (localUserId != null) {
         navigate('/search');
       }
-      
+
     } catch (err) {
       console.error('Error checking session:', err);
     }
@@ -58,7 +58,7 @@ const Login = () => {
 
   const handleSpotifyLogin = async () => {
     try {
-      
+
       localStorage.clear();
       window.location.href = 'http://localhost:5001/spotifyLogin';
 
@@ -66,7 +66,7 @@ const Login = () => {
       setError(err.response ? err.response.data.message : 'Login failed');
     }
   };
-  
+
   const handleRegister = () => {
     navigate('/register'); // You'll need to create a registration route and component
   };
@@ -143,7 +143,8 @@ const Register = () => {
       setError('');
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err.response?.data?.message || 'Registration failed');
+      const errorMessage = err.response.data.error;
+      setError(errorMessage.split(':')[1]?.trim());
     }
   };
 
@@ -243,7 +244,8 @@ const PasswordReset = () => {
       setError('');
     } catch (err) {
       console.error('Password reset error:', err);
-      setError(err.response?.data?.message || 'Password reset failed');
+      const errorMessage = err.response.data.error;
+      setError(errorMessage.split(':')[1]?.trim());
     }
   };
 
@@ -470,6 +472,8 @@ const CommentPage = () => {
 
       setNewComment('');
     } catch (error) {
+      const errorMessage = error.response.data.error
+      alert(errorMessage.split(':')[1]?.trim());
       console.error("Error adding comment:", error);
     }
   };
@@ -531,6 +535,9 @@ const CommentPage = () => {
       );
       setIsEditing(null);
     } catch (error) {
+      if (error.response.status === 429) {
+        alert(error.response.data.error)
+      }
       console.error("Error saving edited comment:", error);
     }
   };

@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
-import datetime
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -306,11 +306,27 @@ def editComment():
         # Include transaction (and rollback) to ensure atomicity
         cursor.execute("START TRANSACTION;")
 
-        # SQL query
-        query = "UPDATE COMMENTS SET CommentInfo = %s, Rating = %s WHERE CommentID = %s;"
-        cursor.execute(query, (new_comment_info, new_rating, comment_id))
+        # Check last edit timestamp
+        query_check = "SELECT LastEditTime FROM COMMENTS WHERE CommentID = %s;"
+        cursor.execute(query_check, (comment_id,))
+        result = cursor.fetchone()
+        if result and result[0]:
+            last_edit_timestamp = result[0].timestamp()
+            current_timestamp = datetime.now().timestamp()
+            if current_timestamp - last_edit_timestamp < 5:
+                cursor.execute("ROLLBACK;")
+                return jsonify({"error": "Rate limit exceeded. Please wait 5 seconds before editing again."}), 429
+
+        # Proceed with editing
+        current_time = datetime.now()
+        query_update = """
+        UPDATE COMMENTS SET CommentInfo = %s, Rating = %s, LastEditTime = %s 
+        WHERE CommentID = %s;
+        """
+        cursor.execute(query_update, (new_comment_info, new_rating, current_time, comment_id))
         connection.commit()
         cursor.close()
+
         return jsonify(True)
 
     except Exception as e:
