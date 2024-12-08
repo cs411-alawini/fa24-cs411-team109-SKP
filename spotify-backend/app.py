@@ -78,16 +78,20 @@ def register():
             return jsonify({"error": "All fields are required"}), 400
 
         cursor = connection.cursor()
+        # Transaction for ACID
+        cursor.execute("START TRANSACTION;")
 
         # Check if username already exists
         cursor.execute("SELECT Username FROM USERS WHERE Username = %s", (username,))
         if cursor.fetchone():
+            cursor.execute("ROLLBACK;")
             cursor.close()
             return jsonify({"error": "Username already exists"}), 409
 
         # Check if email already exists
         cursor.execute("SELECT Email FROM USERS WHERE Email = %s", (email,))
         if cursor.fetchone():
+            cursor.execute("ROLLBACK;")
             cursor.close()
             return jsonify({"error": "Email already exists"}), 409
 
@@ -303,7 +307,7 @@ def editComment():
 
         cursor = connection.cursor()
 
-        # Include transaction (and rollback) to ensure atomicity
+        # Transaction for ACID
         cursor.execute("START TRANSACTION;")
 
         # Check last edit timestamp
