@@ -63,11 +63,15 @@ def logout():
       
 @app.route('/register', methods=['POST'])
 def register():
+    cursor = None
     try:
         # Get registration data from request parameters
         username = request.args.get('username', '').strip()
         password = request.args.get('password', '').strip()
         email = request.args.get('email', '').strip()
+
+        # Print received data for debugging
+        print(f"Received registration request - Username: {username}, Email: {email}")
 
         # Validate input
         if not username or not password or not email:
@@ -88,13 +92,15 @@ def register():
             return jsonify({"error": "Email already exists"}), 409
 
         # Generate a unique UserID
-        # Get the highest numeric UserID and increment by 1
         cursor.execute("SELECT MAX(CAST(UserID AS SIGNED)) FROM USERS WHERE UserID REGEXP '^[0-9]+$'")
         result = cursor.fetchone()
         next_id = str(1 if result[0] is None else result[0] + 1)
+        
+        print(f"Generated UserID: {next_id}")  # Debug print
 
         # Insert new user
         query = "INSERT INTO USERS (UserID, Username, Password, Email) VALUES (%s, %s, %s, %s)"
+        print(f"Executing query with values: ({next_id}, {username}, {password}, {email})")  # Debug print
         cursor.execute(query, (next_id, username, password, email))
         connection.commit()
         cursor.close()
@@ -107,9 +113,39 @@ def register():
         }), 201
 
     except Exception as e:
+        # Print the full error details
+        import traceback
+        print("Registration error occurred:")
+        print(traceback.format_exc())
+        
         if cursor:
             cursor.close()
         return jsonify({"error": str(e)}), 500
+      
+      
+@app.route('/updatePassword', methods=['POST'])
+def update_password():
+    try:
+        # Get parameters from request
+        user_id = request.args.get('userId', '').strip()
+        old_password = request.args.get('oldPassword', '').strip()
+        new_password = request.args.get('newPassword', '').strip()
+
+        cursor = connection.cursor()
+        
+        # Call the UpdatePassword stored procedure
+        cursor.callproc('UpdatePassword', [user_id, old_password, new_password])
+        connection.commit()
+        cursor.close()
+
+        return jsonify({
+            "message": "Password updated successfully",
+            "userId": user_id
+        }), 200
+
+    except Exception as e:
+        print("Password update error:", str(e))
+        return jsonify({"error": str(e)}), 500      
       
 # getSongByTitle(songName: String)
 # Return a list of {songName: String, songId: String}, ranked based on some sort of string similarity algorithm. The maximum length of this list should be 10.

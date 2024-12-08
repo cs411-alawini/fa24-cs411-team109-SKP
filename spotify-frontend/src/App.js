@@ -99,11 +99,14 @@ const Login = () => {
         <button onClick={handleRegister} className="register-button">
           Register
         </button>
+        <p className="forgot-password">
+          <a href="/reset-password" className="forgot-password-link">Forgot Password?</a>
+        </p>
         {error && <p className="login-error">{error}</p>}
       </div>
     </div>
   );
-}
+};
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -111,10 +114,11 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [userId, setUserId] = useState('');
   const navigate = useNavigate();
 
   const handleRegister = async () => {
-    // Basic validation
     if (!username || !password || !confirmPassword || !email) {
       setError('All fields are required');
       return;
@@ -134,11 +138,9 @@ const Register = () => {
         }
       });
 
-      // Assuming the backend returns success message
-      console.log('Registration successful:', response.data);
-      
-      // Navigate to login page after successful registration
-      navigate('/login');
+      setUserId(response.data.UserID);
+      setRegistrationSuccess(true);
+      setError('');
     } catch (err) {
       console.error('Registration error:', err);
       setError(err.response?.data?.message || 'Registration failed');
@@ -152,42 +154,153 @@ const Register = () => {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h1 className="login-title">Register</h1>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
-          className="login-input"
-        />
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          className="login-input"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="login-input"
-        />
-        <input
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm Password"
-          className="login-input"
-        />
-        <button onClick={handleRegister} className="login-button">
-          Register
-        </button>
-        <button onClick={handleBackToLogin} className="register-button">
-          Back to Login
-        </button>
-        {error && <p className="login-error">{error}</p>}
+        {!registrationSuccess ? (
+          <>
+            <h1 className="login-title">Register</h1>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username"
+              className="login-input"
+            />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              className="login-input"
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="login-input"
+            />
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm Password"
+              className="login-input"
+            />
+            <button onClick={handleRegister} className="login-button">
+              Register
+            </button>
+            <button onClick={handleBackToLogin} className="register-button">
+              Back to Login
+            </button>
+            {error && <p className="login-error">{error}</p>}
+          </>
+        ) : (
+          <div className="registration-success">
+            <h1 className="success-title">Registration Successful!</h1>
+            <div className="userid-display">
+              <p>Your UserID is:</p>
+              <p className="userid">{userId}</p>
+              <p className="userid-note">IMPORTANT: Save your SECRET UserID!<br />It is used to login and reset your password!</p>
+            </div>
+            <button onClick={handleBackToLogin} className="login-button">
+              Proceed to Login
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const PasswordReset = () => {
+  const [userId, setUserId] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
+
+  const handlePasswordReset = async () => {
+    if (!userId || !oldPassword || !newPassword || !confirmPassword) {
+      setError('All fields are required');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+
+    try {
+      await axios.post('http://localhost:5001/updatePassword', null, {
+        params: {
+          userId: userId,
+          oldPassword: oldPassword,
+          newPassword: newPassword
+        }
+      });
+      setSuccess(true);
+      setError('');
+    } catch (err) {
+      console.error('Password reset error:', err);
+      setError(err.response?.data?.message || 'Password reset failed');
+    }
+  };
+
+  const handleBackToLogin = () => {
+    navigate('/login');
+  };
+
+  return (
+    <div className="login-container">
+      <div className="login-box">
+        {!success ? (
+          <>
+            <h1 className="login-title">Reset Password</h1>
+            <input
+              type="text"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              placeholder="UserID"
+              className="login-input"
+            />
+            <input
+              type="password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              placeholder="Current Password"
+              className="login-input"
+            />
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="New Password"
+              className="login-input"
+            />
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm New Password"
+              className="login-input"
+            />
+            <button onClick={handlePasswordReset} className="login-button">
+              Reset Password
+            </button>
+            <button onClick={handleBackToLogin} className="register-button">
+              Back to Login
+            </button>
+            {error && <p className="login-error">{error}</p>}
+          </>
+        ) : (
+          <div className="registration-success">
+            <h1 className="success-title">Password Reset Successful!</h1>
+            <button onClick={handleBackToLogin} className="login-button">
+              Back to Login
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -590,6 +703,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/login/:userId" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/reset-password" element={<PasswordReset />} />
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<SearchSongs />} />
           <Route path="/search" element={<SearchSongs />} />
