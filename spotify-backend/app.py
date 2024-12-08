@@ -257,8 +257,9 @@ def addComment():
         cursor = connection.cursor()
 
         # SQL query
-        query = "INSERT INTO COMMENTS (UserID, SongID, CommentInfo, Rating, CreatedOn, ResponseTo) VALUES (%s, %s, %s, %s, NOW(), %s);"
-        cursor.execute(query, (user_id, song_id, new_comment_info, rating, response_to))
+        # query = "INSERT INTO COMMENTS (UserID, SongID, CommentInfo, Rating, CreatedOn, ResponseTo) VALUES (%s, %s, %s, %s, NOW(), %s);"
+        # cursor.execute(query, (user_id, song_id, new_comment_info, rating, response_to))
+        cursor.callproc('AddCommentProcedure', [user_id, song_id, new_comment_info, rating, response_to])
         connection.commit()
 
         cursor.close()
