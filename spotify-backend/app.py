@@ -302,6 +302,10 @@ def editComment():
         print(request.args)
 
         cursor = connection.cursor()
+
+        # Include transaction (and rollback) to ensure atomicity
+        cursor.execute("START TRANSACTION;")
+
         # SQL query
         query = "UPDATE COMMENTS SET CommentInfo = %s, Rating = %s WHERE CommentID = %s;"
         cursor.execute(query, (new_comment_info, new_rating, comment_id))
@@ -311,6 +315,7 @@ def editComment():
 
     except Exception as e:
         # Handle general errors
+        connection.rollback()
         return jsonify({"error": str(e)}), 500
 
 
